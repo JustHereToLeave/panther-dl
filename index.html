@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>panther-dl v1.0</title>
+    <style>
+        /* all of your provided css goes here */
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #c0c0c0;
+            margin: 0;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        body.dark-mode { background-color: #2d2d2d; }
+        body.sage-mode { background-color: #4a5d5a; }
+        body.geis-mode { background-color: #2c2538; }
+        body.coen-mode { background-color: #004447; }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background-color: white;
+            border: 2px inset #c0c0c0;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        body.dark-mode .container { background-color: #404040; border: 2px inset #555; color: #e0e0e0; }
+        body.sage-mode .container { background-color: #5a6b68; border: 2px inset #6b7c79; color: #e0f0f0; }
+        body.geis-mode .container { background-color: #4d3d69; border: 2px inset #3c3c3c; color: #f0e6ff; }
+        body.coen-mode .container { background-color: #005a5f; border: 2px inset #003336; color: #e0ffff; }
+        input[type="text"] {
+            border: 2px inset #c0c0c0; padding: 5px; font-family: 'Courier New', monospace; margin: 5px; background-color: white; color: black; transition: all 0.3s ease;
+            width: 80%;
+        }
+        body.dark-mode input[type="text"] { background-color: #333; color: #e0e0e0; border: 2px inset #555; }
+        body.sage-mode input[type="text"] { background-color: #4a5b58; color: #e0f0f0; border: 2px inset #6b7c79; }
+        body.geis-mode input[type="text"] { background-color: #333; color: #f0e6ff; border: 2px inset #555; }
+        body.coen-mode input[type="text"] { background-color: #003e42; color: #e0ffff; border: 2px inset #003336; }
+        button {
+            background-color: #c0c0c0; border: 2px outset #c0c0c0; padding: 5px 15px; font-family: 'Courier New', monospace; cursor: pointer; margin: 5px; color: black; transition: all 0.3s ease;
+        }
+        body.dark-mode button { background-color: #555; border: 2px outset #555; color: #e0e0e0; }
+        body.sage-mode button { background-color: #6b7c79; border: 2px outset #6b7c79; color: #e0f0f0; }
+        body.geis-mode button { background-color: #3c3c3c; border: 2px outset #555; color: #f0e6ff; }
+        body.coen-mode button { background-color: #3a6063; border: 2px outset #2a4b4d; color: #e0ffff; }
+        button:active { border: 2px inset #c0c0c0; }
+        body.dark-mode button:active { border: 2px inset #555; }
+        body.sage-mode button:active { border: 2px inset #6b7c79; }
+        body.geis-mode button:active { border: 2px inset #555; }
+        body.coen-mode button:active { border: 2px inset #2a4b4d; }
+        .theme-switcher { position: absolute; top: 10px; right: 10px; }
+        .theme-btn { padding: 3px 8px; margin: 2px; font-size: 10px; }
+        #status {
+            margin-top: 15px;
+            font-size: 14px;
+            min-height: 20px;
+            color: #000080;
+        }
+        body.dark-mode #status { color: #4da6ff; }
+        body.sage-mode #status { color: #279287; }
+        body.geis-mode #status { color: #c8b6e6; }
+        body.coen-mode #status { color: #27c2c9; }
+    </style>
+</head>
+<body>
+
+    <div class="theme-switcher">
+        <button class="theme-btn" data-theme="default">default</button>
+        <button class="theme-btn" data-theme="dark-mode">dark</button>
+        <button class="theme-btn" data-theme="sage-mode">sage</button>
+        <button class="theme-btn" data-theme="geis-mode">geis</button>
+        <button class="theme-btn" data-theme="coen-mode">coen</button>
+    </div>
+
+    <div class="container">
+        <h2>youtube downloader</h2>
+        <form id="downloadForm">
+            <input type="text" id="videoUrl" placeholder="paste youtube video url here" required>
+            <button type="submit">download</button>
+        </form>
+        <div id="status"></div>
+    </div>
+
+    <script src="/script.js"></script>
+</body>
+</html>
