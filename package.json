@@ -1,9 +1,7 @@
 {
   "name": "panther-dl",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "start": "node index.js"
   },
@@ -11,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.19.2",
-    "yt-dlp-wrap": "^3.1.2"
-  }
+    "express": "^4.21.2"
+  },
+  "description": ""
 }
