@@ -1,71 +1,81 @@
 // index.js
-import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import YTDlpWrap from 'yt-dlp-wrap';
+const express = require('express');
+const path = require('path');
+const { spawn } = require('child_process');
 
 const app = express();
 const port = process.env.PORT || 8080;
-const ytDlpWrap = new YTDlpWrap();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 app.use(express.json());
 
-// endpoint to serve the main html page
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// endpoint to serve the javascript file
 app.get('/script.js', (req, res) => {
     res.sendFile(path.join(__dirname, 'script.js'));
 });
 
-// the main endpoint that handles the video download
-app.get('/download', async (req, res) => {
+app.get('/download', (req, res) => {
     const videoURL = req.query.url;
     if (!videoURL) {
         return res.status(400).send('video url is required.');
     }
 
-    try {
-        console.log(`fetching metadata for: ${videoURL}`);
-        const metadata = await ytDlpWrap.getVideoInfo(videoURL);
-        const filename = `${metadata.title}.mp4`.replace(/[/\\?%*:|"<>]/g, '-'); // sanitize the filename
+    let videoTitle = 'video';
 
-        console.log(`starting stream for: ${filename}`);
+    // since we downloaded yt-dlp to our project folder, we need to provide the local path to it.
+    const ytDlpCommand = './yt-dlp';
+
+    // step 1: get the video metadata (like the title) first
+    const getMeta = spawn(ytDlpCommand, ['--dump-json', videoURL]);
+
+    let metaData = '';
+    getMeta.stdout.on('data', (data) => {
+        metaData += data.toString();
+    });
+
+    getMeta.on('close', (code) => {
+        if (code === 0) {
+            try {
+                const parsedData = JSON.parse(metaData);
+                videoTitle = parsedData.title;
+            } catch (e) {
+                console.error('failed to parse video metadata:', e);
+            }
+        } else {
+            console.error(`yt-dlp metadata process exited with code ${code}`);
+        }
         
-        // set headers to tell the browser this is a file download
+        // step 2: once we have the title (or a default), start the video stream
+        streamVideo();
+    });
+
+    function streamVideo() {
+        const filename = `${videoTitle}.mp4`.replace(/[/\\?%*:|"<>]/g, '-');
+        console.log(`starting stream for: ${filename}`);
+
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         res.setHeader('Content-Type', 'video/mp4');
 
-        // get the video stream and pipe it directly to the user
-        const videoStream = ytDlpWrap.execStream([
+        const ytDlpStream = spawn(ytDlpCommand, [
             videoURL,
-            '-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best', // request best mp4 format
-            '-o', '-' // output to standard stream
+            '-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+            '-o', '-'
         ]);
-        
-        videoStream.pipe(res);
 
-        videoStream.on('error', (err) => {
-            console.error('stream error:', err);
-            if (!res.headersSent) {
-                res.status(500).send('error during video stream.');
+        ytDlpStream.stdout.pipe(res);
+
+        ytDlpStream.stderr.on('data', (data) => {
+            console.error(`yt-dlp stderr: ${data}`);
+        });
+
+        ytDlpStream.on('close', (code) => {
+            if (code !== 0) {
+                console.log(`yt-dlp stream process exited with code ${code}`);
             }
+            console.log('stream finished.');
         });
-
-        videoStream.on('close', () => {
-            console.log('stream finished for:', filename);
-        });
-
-    } catch (error) {
-        console.error('yt-dlp error:', error);
-        if (!res.headersSent) {
-            res.status(500).send(`error processing video: ${error.message}`);
-        }
     }
 });
 
